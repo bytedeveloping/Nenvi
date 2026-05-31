@@ -1,0 +1,43 @@
+name: 'Run Custom Node Server'
+description: 'Launches a specific Node.js entry file in the background and tests localhost'
+inputs:
+  entry_file:
+    description: 'The main JS file to run'
+    required: true
+    default: 'index.js'
+  port:
+    description: 'The port the server runs on'
+    required: false
+    default: '3000'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Install Dependencies
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          npm ci
+        fi
+
+    # Using the inputs via the inputs context
+    - name: Start Node Application
+      shell: bash
+      run: |
+        node ${{ inputs.entry_file }} &
+      env:
+        PORT: ${{ inputs.port }}
+
+    - name: Wait for Server
+      shell: bash
+      run: sleep 3
+
+    - name: Test Localhost Connection
+      shell: bash
+      run: curl -v http://localhost:${{ inputs.port }}
+

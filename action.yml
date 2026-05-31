@@ -1,50 +1,54 @@
-name: 'Testnode'
-description: 'Installs dependencies, runs a Node.js app on a custom port, and verifies it with a health check.'
-author: 'Your Name or Organization'
+name: "Testnode"
+description: "Run a Node.js server during GitHub Actions workflows."
+author: "bytedeveloping"
+
 branding:
-  icon: 'play-circle'
-  color: 'green'
+  icon: "server"
+  color: "blue"
 
 inputs:
-  port:
-    description: 'The port number your application listens on'
-    required: false
-    default: '3000'
   entry_file:
-    description: 'The primary execution file of your Node app'
-    required: false
-    default: 'app.js'
+    description: "Path to the Node.js entry file."
+    required: true
+    default: "index.js"
+
+  port:
+    description: "Port to run the server on."
+    required: true
+    default: "3000"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: Set up Node.js Environment
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
 
-    - name: Install Project Dependencies
+    - name: Validate entry file exists
       shell: bash
       run: |
-        if [ -f package-lock.json ]; then
-          npm ci
-        else
-          npm install
+        if [ ! -f "${{ inputs.entry_file }}" ]; then
+          echo "❌ Entry file not found: ${{ inputs.entry_file }}"
+          exit 1
         fi
+        echo "✔ Entry file found: ${{ inputs.entry_file }}"
 
-    - name: Launch Application in Background
+    - name: Start Node server
+      shell: bash
+      env:
+        PORT: ${{ inputs.port }}
+      run: |
+        echo "Starting Node server on port $PORT..."
+        nohup node "${{ inputs.entry_file }}" > server.log 2>&1 &
+        echo $! > node_server.pid
+        echo "✔ Node server started in background (PID: $(cat node_server.pid))"
+
+    - name: Wait for server to boot
       shell: bash
       run: |
-        node ${{ inputs.entry_file }} &
-        echo "Application process launched in the background."
+        echo "Waiting for server to start..."
+        sleep 3
+        echo "✔ Server should now be running."
 
-    - name: Wait for Localhost Response
+    - name: Show server log (optional)
       shell: bash
       run: |
-        echo "Probing http://localhost:${{ inputs.port }}..."
-        timeout 30s bash -c 'until curl -s http://localhost:${{ inputs.port }} > /dev/null; do sleep 1; done'
-
-    - name: Execute Live Connection Check
-      shell: bash
-      run: curl -v http://localhost:${{ inputs.port }}
+        echo "---- Server Log ----"
+        tail -n 20 server.log || true

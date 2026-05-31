@@ -1,4 +1,4 @@
-name: "Testnode"
+name: "Nenvi"
 description: "Run a Node.js server during GitHub Actions workflows."
 author: "bytedeveloping"
 

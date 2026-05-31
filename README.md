@@ -1,8 +1,8 @@
 
-# 🚀 Testnode — Node Runner GitHub Action  
+# 🚀 Nenvi — Node Runner GitHub Action  
 Run a Node.js application inside GitHub Actions with a specified **entry file** and **port**.
 
-Testnode is a lightweight composite action designed for workflows that need a running Node server — perfect for integration tests, API checks, webhooks, and CI pipelines that depend on a live backend.
+Nenvi is a lightweight composite action designed for workflows that need a running Node server — perfect for integration tests, API checks, webhooks, and CI pipelines that depend on a live backend.
 
 ---
 
@@ -48,7 +48,7 @@ jobs:
         node-version: 20
 
     - name: Start Node Server
-      uses: bytedeveloping/Testnode@v1
+      uses: bytedeveloping/Nenvi@v1
       with:
         entry_file: "server.js"
         port: 3000
@@ -76,7 +76,7 @@ app.listen(process.env.PORT || 3000, () =>
 
 ## 🛠️ What This Action Does
 
-When executed, Testnode:
+When executed, Nenvi:
 
 1. Validates that your entry file exists  
 2. Starts your Node.js server in the background  

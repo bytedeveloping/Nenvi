@@ -1,43 +1,20 @@
 name: 'Testnode'
-description: 'Launches a specific Node.js entry file in the background and tests localhost'
+description: 'Starts a Node.js application on a custom localhost port and verifies it is running.'
+author: 'Your Name'
+branding:
+  icon: 'play'
+  color: 'green'
+
 inputs:
   entry_file:
-    description: 'The main JS file to run'
-    required: true
-    default: 'index.js'
+    description: 'The main entry file of the Node application'
+    required: false
+    default: 'app.js'
   port:
-    description: 'The port the server runs on'
+    description: 'The port the application listens on'
     required: false
     default: '3000'
 
 runs:
-  using: 'composite'
-  steps:
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-
-    - name: Install Dependencies
-      shell: bash
-      run: |
-        if [ -f package.json ]; then
-          npm ci
-        fi
-
-    # Using the inputs via the inputs context
-    - name: Start Node Application
-      shell: bash
-      run: |
-        node ${{ inputs.entry_file }} &
-      env:
-        PORT: ${{ inputs.port }}
-
-    - name: Wait for Server
-      shell: bash
-      run: sleep 3
-
-    - name: Test Localhost Connection
-      shell: bash
-      run: curl -v http://localhost:${{ inputs.port }}
-
+  using: 'node20'
+  main: 'dist/index.js'

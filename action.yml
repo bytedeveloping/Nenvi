@@ -1,4 +1,4 @@
-name: 'Run Custom Node Server'
+name: 'Testnode'
 description: 'Launches a specific Node.js entry file in the background and tests localhost'
 inputs:
   entry_file:

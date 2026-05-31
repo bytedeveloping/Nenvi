@@ -1,20 +1,50 @@
 name: 'Testnode'
-description: 'Starts a Node.js application on a custom localhost port and verifies it is running.'
-author: 'Your Name'
+description: 'Installs dependencies, runs a Node.js app on a custom port, and verifies it with a health check.'
+author: 'Your Name or Organization'
 branding:
-  icon: 'play'
+  icon: 'play-circle'
   color: 'green'
 
 inputs:
-  entry_file:
-    description: 'The main entry file of the Node application'
-    required: false
-    default: 'app.js'
   port:
-    description: 'The port the application listens on'
+    description: 'The port number your application listens on'
     required: false
     default: '3000'
+  entry_file:
+    description: 'The primary execution file of your Node app'
+    required: false
+    default: 'app.js'
 
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: 'composite'
+  steps:
+    - name: Set up Node.js Environment
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install Project Dependencies
+      shell: bash
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
+
+    - name: Launch Application in Background
+      shell: bash
+      run: |
+        node ${{ inputs.entry_file }} &
+        echo "Application process launched in the background."
+
+    - name: Wait for Localhost Response
+      shell: bash
+      run: |
+        echo "Probing http://localhost:${{ inputs.port }}..."
+        timeout 30s bash -c 'until curl -s http://localhost:${{ inputs.port }} > /dev/null; do sleep 1; done'
+
+    - name: Execute Live Connection Check
+      shell: bash
+      run: curl -v http://localhost:${{ inputs.port }}
